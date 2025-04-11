@@ -24,5 +24,5 @@ plt.title('Output')
 plt.axis('off')
 
 plt.tight_layout()
-#plt.savefig('resultado.png')  # También se guarda por si se quiere incluir en el informe
+plt.savefig('resultado.png')  # También se guarda por si se quiere incluir en el informe
 print("✅ Imagen guardada como resultado.png")
