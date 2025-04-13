@@ -47,4 +47,5 @@ echo "✅ Listo. Imagenes generadas en output/"
 
 # Visualización con Python
 echo "🖼️ Visualizando imágenes..."
-python3 visualize.py $quadrant
+python3 python/visualize.py $quadrant
+
