@@ -1,13 +1,19 @@
 section .data
     input_filename  db 'input.img', 0
     output_filename db 'output.img', 0
+    quadrant_filename db 'quadrant.img', 0
+    expanded_filename db 'expanded.img', 0
+
     input_width     equ 390
     block_size      equ 97
     output_size     equ 193
-    quadrant_number equ 7
     buffer          times 152100 db 0
     inblock         times 9409 db 0
     outblock        times 37249 db 0
+
+%ifndef QUADRANT_NUMBER
+    %define QUADRANT_NUMBER 7   ; Valor por defecto si no se pasa desde el script
+%endif
 
 section .text
     global _start
@@ -33,7 +39,7 @@ _start:
     int 0x80
 
     ; --- Calcular posición del cuadrante ---
-    mov eax, quadrant_number
+    mov eax, QUADRANT_NUMBER
     dec eax
     mov ebx, 4
     xor edx, edx
@@ -100,6 +106,43 @@ _start:
     inc ecx
     cmp ecx, block_size
     jl .copy_known_rows
+
+    ; --- Guardar cuadrante original en quadrant.img ---
+    mov eax, 5
+    mov ebx, quadrant_filename
+    mov ecx, 577        ; O_CREAT | O_WRONLY | O_TRUNC
+    mov edx, 0644
+    int 0x80
+    mov esi, eax
+
+    mov eax, 4
+    mov ebx, esi
+    mov ecx, inblock
+    mov edx, 9409       ; 97x97
+    int 0x80
+
+    mov eax, 6
+    mov ebx, esi
+    int 0x80
+
+    ; --- Guardar cuadrante expandido (sin interpolar) en expanded.img 
+    mov eax, 5
+    mov ebx, expanded_filename
+    mov ecx, 577
+    mov edx, 0644
+    int 0x80
+    mov esi, eax
+
+    mov eax, 4
+    mov ebx, esi
+    mov ecx, outblock
+    mov edx, 37249      ; 193x193
+    int 0x80
+
+    mov eax, 6
+    mov ebx, esi
+    int 0x80
+
 
     ; --- Interpolación horizontal [2i][2j+1] = promedio([2i][2j], [2i][2j+2]) ---
     xor ecx, ecx         ; i de 0 a 96
